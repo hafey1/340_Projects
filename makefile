@@ -1,5 +1,5 @@
 all:
-	gcc -Wall -o project1 ./project1.c
+	gcc -Wall -o -l project1 ./project1.c
 	./project1
 
 clean:
