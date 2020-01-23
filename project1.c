@@ -3,14 +3,19 @@
 #include <stdlib.h>
 //#include </usr/include/linux/sched.h>
 #include <regex.h>
+#include <string.h>
 
 // this code is borrowed from geeksforgeeks.org/c-program-list-files-sub-directories-directory/
+
+//we have 1 PID, we can get 4  PPID and 23 VSIZE and 2 COMM from fopen and fscanthen we can cross reference every PID against every other process's PPID and when there is a match the PID needs to link to the child process. Then some sort ofQUEUE to help with the tabbing of the output to console.
+
+
 int main(int argc, char **args) 
 {	int rv;
-	regmatch_t match[100];
+	regmatch_t match[1000];
 	regex_t exp;
-	rv = regcomp(&exp, "^[0-9]+", REG_NOSUB);
-
+	rv = regcomp(&exp, "^[0-9]", REG_EXTENDED);
+	FILE *fp;
 	//struct pid *superpoint = task_pid(1);	
        	struct dirent *de;  // Pointer for directory entry 
   
@@ -26,10 +31,24 @@ int main(int argc, char **args)
     // Refer http://pubs.opengroup.org/onlinepubs/7990989775/xsh/readdir.html 
     // for readdir() 
     while ((de = readdir(dr)) != NULL){ 
-	printf("%s\n", de->d_name);
-	    rv = regexec(&exp, de->d_name, 100, match, REG_NOTEOL);
-	    if( rv == 0)   
-	    printf("%s\n", de->d_name); 
+	//printf("%s\n", de->d_name);
+	    rv = regexec(&exp, de->d_name, 1000, match, REG_NOTEOL);
+	   // printf("%d", rv);
+	    if( rv == 0)   {
+		char comm[250] = "cat";
+		int pid;
+		char *procnum = malloc(12 + strlen(de->d_name));
+		//procnum = strcat("/proc/", de->d_name);
+		//procnum = strcat(procnum, "/stat");
+		
+		strcpy( procnum, "/proc/");
+		strcat( procnum, de->d_name);
+		strcat( procnum, "/stat");
+	    	fp = fopen(procnum, "r");
+		   // printf("%s\n", de->d_name);
+		fscanf(fp, "%d %s", &pid, comm);
+	    		printf(" this is the pid %d, this is the comm %s\n", pid, comm);	
+	    } 
   	}
     closedir(dr);     
     return 0; 
