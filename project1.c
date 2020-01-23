@@ -9,7 +9,7 @@ int main(int argc, char **args)
 {	int rv;
 	regmatch_t match[100];
 	regex_t exp;
-	rv = regcom(&exp, "^[0-9]+", REG_NOSUB);
+	rv = regcomp(&exp, "^[0-9]+", REG_NOSUB);
 
 	//struct pid *superpoint = task_pid(1);	
        	struct dirent *de;  // Pointer for directory entry 
@@ -26,7 +26,9 @@ int main(int argc, char **args)
     // Refer http://pubs.opengroup.org/onlinepubs/7990989775/xsh/readdir.html 
     // for readdir() 
     while ((de = readdir(dr)) != NULL){ 
-	if(regexec(&exp, d, 100, match) == 0)   
+	printf("%s\n", de->d_name);
+	    rv = regexec(&exp, de->d_name, 100, match, REG_NOTEOL);
+	    if( rv == 0)   
 	    printf("%s\n", de->d_name); 
   	}
     closedir(dr);     
