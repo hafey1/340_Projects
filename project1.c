@@ -36,7 +36,12 @@ int main(int argc, char **args)
 	   // printf("%d", rv);
 	    if( rv == 0)   {
 		char comm[250] = "cat";
-		int pid;
+		char state;
+		int pid, ppid, pgrrp, session, tty_nr, tpgid;
+		unsigned int flags;
+		unsigned long int minflt, cminflt, majflt, cmajflt, utime, stime, vsize;
+		long int cutime, cstime, priority, nice, num_threads, itrealvalue;
+		unsigned long long int starttime;
 		char *procnum = malloc(12 + strlen(de->d_name));
 		//procnum = strcat("/proc/", de->d_name);
 		//procnum = strcat(procnum, "/stat");
@@ -47,11 +52,15 @@ int main(int argc, char **args)
 	    	fp = fopen(procnum, "r");
 		   // printf("%s\n", de->d_name);
 		fscanf(fp, "%d %s %c %d %d %d %d %d %u %lu %lu %lu %lu %lu %lu %ld %ld %ld %ld %ld %ld %llu %lu",
-						&pid, comm, state, ppid, pgrrp, session, tty_nr, tpgid, flags, minflt, cminflt, majflt,
-						cmajflt, utime, stime, cutime, cstime, priority, nice, num_threads, itrealvalue,
-						starttime, vsize);
+						&pid, comm, &state, &ppid, &pgrrp, &session, &tty_nr, &tpgid, &flags,
+						&minflt, &cminflt, &majflt, &cmajflt, &utime, &stime, &cutime, &cstime, &priority, &nice, &num_threads,
+						&itrealvalue, &starttime, &vsize);
 	    		printf(" this is the pid %d, this is the comm %s\n", pid, comm);
-					printf(" this is the ppid %d, this is the memsize %lu bytes", ppid, vsize);	
+					printf("this is the state %c and ppid %d\n", state, ppid);
+					printf("%d %d %d %d %u %lu %lu %lu %lu %lu %lu %ld %ld %ld %ld %ld %ld %llu\n%lu\n", pgrrp, session, tty_nr, tpgid, flags,
+									minflt, cminflt, majflt, cmajflt, utime, stime, cutime, cstime, priority,
+									nice, num_threads, itrealvalue, starttime, vsize);
+					/*printf(" this is the ppid %d, this is the memsize %lu bytes", ppid, vsize);*/
 	    }
   	}
     closedir(dr);
