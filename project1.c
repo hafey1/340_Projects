@@ -22,38 +22,37 @@ struct process{
 
 // this is a recursive function that takes a pointer to the beginning of the linked list of processes, and the pointer to the established parent process
 void printOutFileSystem(struct process *start, struct process *parent) {
-	
+
 	//the childFinder must always check the whole list so must start from the beginning
 	//the parent cross reference is passed in from the recursive function call
 	struct process *childFinder = start;
 	struct process *parentChecker = parent;
-	
+
+	char spaces[250]= "";
+	for (int i = 0; i < parentChecker->level; i++) {
+		strcat(spaces, "  ");
+	}
+
+	//this is the string that will contain the desired information about the process
+	char processInfo[250] = "-";
+	sprintf(processInfo, "pid: %d :: %s :: ppid: %d :: memory used: %lu bytes\n", parentChecker->pid, parentChecker->comm, parentChecker->ppid, parentChecker->vsize);
+	strcat(spaces, processInfo);
+	printf("%s", spaces);
+
 	//the stop condition is when the current function has checked for all possible children and is at the end of the list
 	//when this happens it will wind back to previous calls and exit appropriately..... hopefully
 	while (childFinder != NULL) {
 		if (parentChecker->pid == childFinder->ppid) {
 			//when you establish a child parent relation the level of the child must be 1 more than the parent, this is useful for the output format desired
 			childFinder->level = parentChecker->level + 1;
-			
-			//this uses the level information of the parent to determine its format
-			char spaces[250]= "--";
-			for (int i = 0; i < parentChecker->level; i++) {
-				strcat(spaces, "--");
-			}
-			
-			//this is the string that will contain the desired information about the process
-			char processInfo[250] = "-";
-			sprintf(processInfo, "pid: %d :: %s :: ppid: %d :: memory used: %lu bytes\n", parentChecker->pid, parentChecker->comm, parentChecker->ppid, parentChecker->vsize);
-			strcat(spaces, processInfo);
-			printf("%s", spaces);
-			printOutFileSystem(start, childFinder);}
-			
+			printOutFileSystem(start, childFinder);
+		}
+
 			//if we did not find a child at this location we need to move on to the next one
 			childFinder = childFinder->next;
-	}	
-
+	}
 }
-	
+
 
 
 
@@ -96,7 +95,8 @@ int main(int argc, char **args){
 	    rv = regexec(&exp, de->d_name, 1000, match, REG_NOTEOL);
 	   // printf("%d", rv);
 	    if( rv == 0)   {
-			char comm[250] = "cat";
+			char *comm;
+			comm = malloc(sizeof(char)*30);
 			char state;
 			int pid, ppid, pgrrp, session, tty_nr, tpgid;
 			unsigned int flags;
@@ -128,13 +128,24 @@ int main(int argc, char **args){
 				new_proc->level = 0;
 				new_proc->next = NULL;
 				prev = new_proc;
+				//printf("%s\n", new_proc->comm);
 	    }
   	}
 
 	struct process *cats = zero;
 	printOutFileSystem(zero, cats);
 
+  closedir(dr);
 
-    closedir(dr);
+	//clear that data
+	struct process *clearPointer;
+	struct process *otherPoint;
+	clearPointer = zero;
+	while(clearPointer != NULL){
+		otherPoint = clearPointer;
+		clearPointer = clearPointer->next;
+		free(otherPoint);
+	}
+
     return 0;
 }
