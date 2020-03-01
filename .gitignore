@@ -4,4 +4,4 @@ makefile
 
 .idea/*
 
-_init_.py
+PagingSim/__init__.py
