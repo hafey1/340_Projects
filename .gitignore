@@ -2,3 +2,6 @@ project1
 
 makefile
 
+.idea/*
+
+_init_.py
