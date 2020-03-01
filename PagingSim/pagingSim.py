@@ -22,25 +22,45 @@ def validPageSize(memSize, pageSize):
         print("Page Size Must Be An Even Multiple Of Memory Size")
         sys.exit(1)
 
-def jobCreations(runTimeMin, runTimeMax, memMin, memMax, randSeed, numJobs):
+def jobCreations(pageSize, runTimeMin, runTimeMax, memMin, memMax, randSeed, numJobs):
     # A method to create job run times and memory and print them
-    runTime = []
-    jobMem = []
-    totTime = 0
     print("Job Queue:\n  Job #    Runtime    Memory")
-    for job in range(numJobs):
-        random.seed(randSeed)
-        runTime.append(random.randint(runTimeMin, runTimeMax))
-        jobMem.append(random.randint(memMin, memMax))
-        print("{0: >7}{1: >11}{2: >10}".format((job+1), runTime[job], jobMem[job]))
-        totTime = totTime + runTime[job]
-        randSeed+=1
-    return totTime, runTime, jobMem
+    newSeed = int(randSeed)
+    random.seed(newSeed)
+    currentTime = 0
+    # status: -1 = not started, 0 = running, 1 = completed
+    status = -1
+    startTime = -1
+    endTime = -1
+    currTime = 0
+    jobMem = random.randint(memMin,memMax)
+    runTime = random.randint(runTimeMin, runTimeMax)
+    pagesReq = (jobMem//pageSize)
+    if (jobMem%pageSize) != 0:
+        pagesReq+=1
+    jobNum = 1
+    job = {1: [jobNum, status, pagesReq, jobMem, runTime, currTime, startTime, endTime]}
+    totTime = runTime
+    print("{0: >7}{1: >11}{2: >10}".format((jobNum), runTime, jobMem))
+    for i in range(2, numJobs + 1):
+        newSeed+=1
+        random.seed(newSeed)
+        jobMem = random.randint(memMin, memMax)
+        runTime = random.randint(runTimeMin, runTimeMax)
+        pagesReq = (jobMem // pageSize)
+        if (jobMem % pageSize) != 0:
+            pagesReq += 1
+        jobNum = i
+        job[i] = [jobNum, status, pagesReq, jobMem, runTime, currTime, startTime, endTime]
+
+        print("{0: >7}{1: >11}{2: >10}".format((jobNum), runTime, jobMem))
+        totTime = totTime + runTime
+    return totTime, job
 
 def simulateCalc(totTime, numPages, runTime, jobMem, numJobs):
     print("\nSimulator Starting:")
     i = 1
-    j=1
+    j = 1
     endTime = []
     while i <= totTime:
         print("\nTime Step {0}: ".format(i))
@@ -91,14 +111,15 @@ def main():
     runTimeMax = int(sys.argv[5])
     memMin = int(sys.argv[6])
     memMax = int(sys.argv[7])
-    numPages = memSize/pageSize
+    totNumPages = memSize/pageSize
+    pagesAvail = totNumPages
 
     print("\nSimulator Parameters:\n  Memory Size: {0}\n  Page Size: {1}\n  Random Seed: {2}\n"
           "  Number of Jobs: {3}\n  Runtime (min-max) Timesteps: {4}-{5}\n"
           "  Memory (min-max): {6}-{7}\n".format(memSize, pageSize, seed, numJobs,
                                                      runTimeMin, runTimeMax, memMin, memMax))
 
-    totTime, runTime, jobMem = jobCreations(runTimeMin, runTimeMax, memMin, memMax, seed, numJobs)
-    simulateCalc(totTime, numPages, runTime, jobMem, numJobs)
+    totTime, job = jobCreations(pageSize, runTimeMin, runTimeMax, memMin, memMax, randSeed, numJobs)
+    #simulateCalc(totTime, numPages, runTime, jobMem, numJobs)
 
 main()
