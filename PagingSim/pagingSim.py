@@ -11,8 +11,8 @@ def validInput(args):
         sys.exit(1)
 
 def checkSeed(randSeed):
-    # A method to check that the random seed has been set and chooses random if not
-    if randSeed == 'None'or randSeed == "":
+    # A method to check that the random seed has been set and chooses random seed if not
+    if randSeed == None:
         randSeed = random.randint(1,100)
     return randSeed
 
@@ -48,9 +48,12 @@ def simulateCalc(totTime, numPages, runTime, jobMem, numJobs):
             for num in range(numJobs):
                 print("  Job {0} is starting".format(num + 1))
                 endTime.append(-1)
+        # Decide which job is running
         job = (j%3)
         if job == 0:
             job = 3
+        # If a job is completed, the end time will no longer be -1
+        # This indicates that said job may be skipped
         while endTime[job-1] > -1:
             job+=1
             job=job%3
@@ -59,6 +62,7 @@ def simulateCalc(totTime, numPages, runTime, jobMem, numJobs):
             j+=1
 
         print("  Job {0} Running".format(job))
+        # Decrements job time by 1 and when it hits 0, the completion time is recorded
         runTime[job-1] = runTime[job-1] - 1
         if runTime[job-1] == 0:
             print("  Job {0} Completed".format(job))
@@ -66,6 +70,7 @@ def simulateCalc(totTime, numPages, runTime, jobMem, numJobs):
         print("  Page Table:")
         i+=1
         j+=1
+    # Final start and end times for each job
     print("\nJob Information:\n  Job #    Start Time    End Time")
     for jobs in range(numJobs):
         print("{0: >7}{1: >14}{2: >12}".format((jobs + 1), '1', endTime[jobs]))
@@ -79,8 +84,8 @@ def main():
     pageSize = int(sys.argv[2])
     validPageSize(memSize, pageSize)
     # 'export RANDOM_SEED=decimal' in command line
-    randSeed = int(os.environ.get("RANDOM_SEED"))
-    randSeed = int(checkSeed(randSeed))
+    randSeed = os.environ.get("RANDOM_SEED")
+    seed = checkSeed(randSeed)
     numJobs = int(sys.argv[3])
     runTimeMin = int(sys.argv[4])
     runTimeMax = int(sys.argv[5])
@@ -90,10 +95,10 @@ def main():
 
     print("\nSimulator Parameters:\n  Memory Size: {0}\n  Page Size: {1}\n  Random Seed: {2}\n"
           "  Number of Jobs: {3}\n  Runtime (min-max) Timesteps: {4}-{5}\n"
-          "  Memory (min-max): {6}-{7}\n".format(memSize, pageSize, randSeed, numJobs,
+          "  Memory (min-max): {6}-{7}\n".format(memSize, pageSize, seed, numJobs,
                                                      runTimeMin, runTimeMax, memMin, memMax))
 
-    totTime, runTime, jobMem = jobCreations(runTimeMin, runTimeMax, memMin, memMax, randSeed, numJobs)
+    totTime, runTime, jobMem = jobCreations(runTimeMin, runTimeMax, memMin, memMax, seed, numJobs)
     simulateCalc(totTime, numPages, runTime, jobMem, numJobs)
 
 main()
