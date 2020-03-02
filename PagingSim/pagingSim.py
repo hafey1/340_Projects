@@ -39,10 +39,10 @@ def jobCreations(pageSize, runTimeMin, runTimeMax, memMin, memMax, randSeed, num
     if (jobMem%pageSize) != 0:
         pagesReq+=1
     jobNum = 1
-    job = {1: [jobNum, status, pagesReq, jobMem, runTime, currTime, startTime, endTime]}
+    job = {0: [jobNum, status, pagesReq, jobMem, runTime, currTime, startTime, endTime]}
     totTime = runTime
     print("{0: >7}{1: >11}{2: >10}".format((jobNum), runTime, jobMem))
-    for i in range(2, numJobs + 1):
+    for i in range(1, numJobs):
         newSeed+=1
         random.seed(newSeed)
         jobMem = random.randint(memMin, memMax)
@@ -50,54 +50,58 @@ def jobCreations(pageSize, runTimeMin, runTimeMax, memMin, memMax, randSeed, num
         pagesReq = (jobMem // pageSize)
         if (jobMem % pageSize) != 0:
             pagesReq += 1
-        jobNum = i
+        jobNum = i + 1
         job[i] = [jobNum, status, pagesReq, jobMem, runTime, currTime, startTime, endTime]
 
         print("{0: >7}{1: >11}{2: >10}".format((jobNum), runTime, jobMem))
         totTime = totTime + runTime
     return totTime, job
 
-def simulateCalc(totTime, numPages, runTime, jobMem, numJobs):
+def loadJob(job, pagesAvail, jobsRunning):
+    for run in range(len(jobsRunning)):
+        pagesAvail = pagesAvail - job[run][2]
+    for num in job:
+        if job[num][1] == -1 and job[num][2] <= pagesAvail and job[num][0] not in jobsRunning:
+            jobsRunning.append(job[num][0])
+            pagesAvail = pagesAvail - job[num][2]
+    return jobsRunning
+
+def pageTable(job, jobsRunning, pagesAvail):
+    pageTable = []
+    for i in range(len(jobsRunning)):
+        for j in range(job[jobsRunning[i]][2]):
+            pageTable.append(jobsRunning[i])
+    for pages in pagesAvail:
+        pageTable.append('.')
+    print(pageTable)
+
+
+
+def simulateCalc(job, totTime, totNumPages, numJobs):
+    # job[i] = [jobNum, status, pagesReq, jobMem, runTime, currTime, startTime, endTime]
+    jobsRunning = []
     print("\nSimulator Starting:")
     i = 1
-    j = 1
-    endTime = []
+    # run for total time for all jobs
     while i <= totTime:
         print("\nTime Step {0}: ".format(i))
-        if i == 1:
-            for num in range(numJobs):
-                print("  Job {0} is starting".format(num + 1))
-                endTime.append(-1)
-        # Decide which job is running
-        job = (j%3)
-        if job == 0:
-            job = 3
-        # If a job is completed, the end time will no longer be -1
-        # This indicates that said job may be skipped
-        while endTime[job-1] > -1:
-            job+=1
-            job=job%3
-            if job == 0:
-                job = 3
-            j+=1
-
-        print("  Job {0} Running".format(job))
-        # Decrements job time by 1 and when it hits 0, the completion time is recorded
-        runTime[job-1] = runTime[job-1] - 1
-        if runTime[job-1] == 0:
-            print("  Job {0} Completed".format(job))
-            endTime[job-1] = i
-        print("  Page Table:")
+        jobsRunning = loadJob(job, totNumPages, jobsRunning)
+        # Prints the jobs that are starting
+        for j in range(len(jobsRunning)):
+            if job[jobsRunning[j]-1][1] == -1:
+                print("  Job {0} is starting".format(jobsRunning[j]))
+                job[jobsRunning[j]-1][1] = 0
+                job[jobsRunning[j]-1][6] = i
         i+=1
-        j+=1
-    # Final start and end times for each job
+
+
+
     print("\nJob Information:\n  Job #    Start Time    End Time")
     for jobs in range(numJobs):
-        print("{0: >7}{1: >14}{2: >12}".format((jobs + 1), '1', endTime[jobs]))
+        print("{0: >7}{1: >14}{2: >12}".format(job[jobs][0], job[jobs][6], job[jobs][7]))
 
 
 def main():
-
     # Get arguments from command line
     validInput(sys.argv)
     memSize = int(sys.argv[1])
@@ -112,7 +116,6 @@ def main():
     memMin = int(sys.argv[6])
     memMax = int(sys.argv[7])
     totNumPages = memSize/pageSize
-    pagesAvail = totNumPages
 
     print("\nSimulator Parameters:\n  Memory Size: {0}\n  Page Size: {1}\n  Random Seed: {2}\n"
           "  Number of Jobs: {3}\n  Runtime (min-max) Timesteps: {4}-{5}\n"
@@ -120,6 +123,7 @@ def main():
                                                      runTimeMin, runTimeMax, memMin, memMax))
 
     totTime, job = jobCreations(pageSize, runTimeMin, runTimeMax, memMin, memMax, randSeed, numJobs)
-    #simulateCalc(totTime, numPages, runTime, jobMem, numJobs)
+
+    simulateCalc(job, totTime, totNumPages, numJobs)
 
 main()
