@@ -79,12 +79,21 @@ def pageTable(job, jobsRunning, pagesAvail):
     pageTable = []
     for i in range(len(jobsRunning)):
         for j in range(job[jobsRunning[i] - 1][2]):
-            pageTable.append(jobsRunning[i])
+            pageTable.append(str(jobsRunning[i]))
     pages = int(pagesAvail) - (len(pageTable))
     for page in range(pages):
         pageTable.append('.')
+    pageTableStr = "  "
+    j = 1
+    for i in range(len(pageTable)):
+        pageTableStr = pageTableStr + pageTable[i]
+        if j%4 == 0:
+            pageTableStr = pageTableStr + ' '
+        if j%16 == 0:
+            pageTableStr = pageTableStr + '\n  '
+        j+=1
     print("  Page Table:")
-    print(pageTable)
+    print(pageTableStr)
 
 
 
