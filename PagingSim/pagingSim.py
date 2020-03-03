@@ -154,8 +154,6 @@ def main():
     totNumPages = memSize/pageSize
 
 
-    print("In Main {0}".format(totNumPages))
-
     print("\nSimulator Parameters:\n  Memory Size: {0}\n  Page Size: {1}\n  Random Seed: {2}\n"
           "  Number of Jobs: {3}\n  Runtime (min-max) Timesteps: {4}-{5}\n"
           "  Memory (min-max): {6}-{7}\n".format(memSize, pageSize, seed, numJobs,
