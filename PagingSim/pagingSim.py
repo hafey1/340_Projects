@@ -26,6 +26,7 @@ def validPageSize(memSize, pageSize):
         sys.exit(1)
 
 def jobCreations(pageSize, runTimeMin, runTimeMax, memMin, memMax, randSeed, numJobs):
+    # jobs are stored in a dictionary structure where a jobs number is its key and its value is a list of necessary information about it
     # A method to create job run times and memory and print them
     print("Job Queue:\n  Job #    Runtime    Memory")
     newSeed = int(randSeed)
@@ -41,16 +42,20 @@ def jobCreations(pageSize, runTimeMin, runTimeMax, memMin, memMax, randSeed, num
     pagesReq = (jobMem//pageSize)
     if (jobMem%pageSize) != 0:
         pagesReq+=1
+    #sets the first job to initialize the dictionary Yay python
     jobNum = 1
     job = {0: [jobNum, status, pagesReq, jobMem, runTime, currTime, startTime, endTime]}
     totTime = runTime
     print("{0: >7}{1: >11}{2: >10}".format((jobNum), runTime, jobMem))
+    #sets the rest of the jobs with their relevent information
     for i in range(1, numJobs):
         newSeed+=1
         random.seed(newSeed)
+
         jobMem = random.randint(memMin, memMax)
         runTime = random.randint(runTimeMin, runTimeMax)
         pagesReq = (jobMem // pageSize)
+        #checking for necessary internal fragmentation
         if (jobMem % pageSize) != 0:
             pagesReq += 1
         jobNum = i + 1
@@ -61,16 +66,20 @@ def jobCreations(pageSize, runTimeMin, runTimeMax, memMin, memMax, randSeed, num
     return totTime, job
 
 def loadJob(job, totPages, jobsRunning):
+    #creating available pages by going through jobs currently running
     pagesA = totPages
     for run in range(len(jobsRunning)):
+        #[2] is pages required to run
         pagesA = pagesA - job[jobsRunning[run] - 1][2]
     for num in job:
+        #if a job has not started and pages for the job are available and it is not in job running add it to jobsRunning
         if job[num][1] == -1 and job[num][2] <= pagesA and job[num][0] not in jobsRunning:
             jobsRunning.append(job[num][0])
             pagesA = pagesA - job[num][2]
     return jobsRunning
 
 def removeJob(job, jobsRunning, currJob, i):
+    #if a jobs current runtime is equal to its total run time
     if job[jobsRunning[currJob] - 1][5] == job[jobsRunning[currJob] - 1][4]:
         print("  Job {0} Completed".format(jobsRunning[currJob]))
         job[jobsRunning[currJob] - 1][1] = 1
@@ -79,6 +88,8 @@ def removeJob(job, jobsRunning, currJob, i):
     return jobsRunning
 
 def pageTable(job, jobsRunning, pagesAvail):
+    #the page table visualization loops through and creates a string of each jobs currently used pages and adds on any addtional
+    #free pages not being used to the end of the table's visualization
     pageTable = []
     for i in range(len(jobsRunning)):
         for j in range(job[jobsRunning[i] - 1][2]):
@@ -89,6 +100,7 @@ def pageTable(job, jobsRunning, pagesAvail):
     pageTableStr = "  "
     j = 1
     for i in range(len(pageTable)):
+        #pretty visualization pieces
         pageTableStr = pageTableStr + pageTable[i]
         if j%4 == 0:
             pageTableStr = pageTableStr + ' '
@@ -101,6 +113,7 @@ def pageTable(job, jobsRunning, pagesAvail):
 
 
 def simulateCalc(job, totTime, totNumPages, numJobs):
+
     # job[i] = [jobNum, status, pagesReq, jobMem, runTime, currTime, startTime, endTime]
     pagesAvail = totNumPages
     jobsRunning = []
@@ -155,7 +168,6 @@ def main():
     memMin = int(sys.argv[6])
     memMax = int(sys.argv[7])
     totNumPages = memSize/pageSize
-
 
     print("\nSimulator Parameters:\n  Memory Size: {0}\n  Page Size: {1}\n  Random Seed: {2}\n"
           "  Number of Jobs: {3}\n  Runtime (min-max) Timesteps: {4}-{5}\n"
