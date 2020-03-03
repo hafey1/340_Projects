@@ -9,6 +9,9 @@ def validInput(args):
         print("python3 pagingSim.py <memory size> <page size> <number of jobs> <runtime min> "
               "<runtime max> <memory min> <memory max>")
         sys.exit(1)
+    if int(args[3]) <= 0:
+        print("No Jobs To Run")
+        sys.exit(1)
 
 def checkSeed(randSeed):
     # A method to check that the random seed has been set and chooses random seed if not
