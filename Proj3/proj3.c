@@ -54,10 +54,21 @@ int main(int argc, char **arg) {
 		printf("Please enter int:<tasksToRun>\n");
 	}
 
+	char *thing = "the meme\n\0";
+	char *secthing = "anothermeme\n\0";	
+
 	char *cbuffer[3];
 	QUEUE q = {0, 0, 3, cbuffer, PTHREAD_MUTEX_INITIALIZER};
-	assert(sem_init(&q.empty, 0, 3) == 3);
+	assert(sem_init(&q.empty, 0, 3) == 0);
 	assert(sem_init(&q.full, 0, 0) == 0);
+
+	put(&q, thing);
+	put(&q, thing);
+	char *an = get(&q);
+	char *gn = get(&q);
+	
+	printf("\nThis is the meme: %s\n", thing);
+	printf("\nThis is the sec meme: %s\n",secthing);
 
 	char *text = calloc(1,1), buffer[BUFFERSIZE];
 	//now to get stuff from stdin
