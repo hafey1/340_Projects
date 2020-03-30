@@ -132,13 +132,13 @@ int main(int argc, char **arg) {
 	
 	pthread_t threadID[tasksToRun];
 	
-	int taskNum[tasksToRun];
+	int *taskNum = malloc(tasksToRun * (sizeof(int)));
 	for (int i = 0; i < tasksToRun; i++){
 		taskNum[i] = i;
 	}
 	for (int i = 0; i < tasksToRun; i++){ 
 		
-		int errorCheck = pthread_create(&threadID[i], NULL, &wordCount, (void *) taskNum[i]);
+		int errorCheck = pthread_create(&threadID[i], NULL, &wordCount, taskNum++);
 		if (errorCheck) {
 			printf("Failed to create Thread %d", i);
 			exit(1);	
