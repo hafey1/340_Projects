@@ -56,12 +56,12 @@ int main(int argc, char **arg) {
 
 	char *thing = "the meme\n\0";
 	char *secthing = "anothermeme\n\0";	
-
-	char *cbuffer[3];
-	QUEUE q = {0, 0, 3, cbuffer, PTHREAD_MUTEX_INITIALIZER};
-	assert(sem_init(&q.empty, 0, 3) == 0);
+	//this is the queue being intialized
+	char *cbuffer[8];
+	QUEUE q = {0, 0, 8, cbuffer, PTHREAD_MUTEX_INITIALIZER};
+	assert(sem_init(&q.empty, 0, 8) == 0);
 	assert(sem_init(&q.full, 0, 0) == 0);
-
+	//first round testing
 	put(&q, thing);
 	put(&q, thing);
 	char *an = get(&q);
@@ -70,20 +70,47 @@ int main(int argc, char **arg) {
 	printf("\nThis is the meme: %s\n", thing);
 	printf("\nThis is the sec meme: %s\n",secthing);
 
+	int lineCount = 0;
 	char *text = calloc(1,1), buffer[BUFFERSIZE];
-	//now to get stuff from stdin
+	//now to get stuff from stdin black magic dont question
 	while (fgets(buffer, BUFFERSIZE, stdin)) {
 		text = realloc( text, strlen(text)+1+strlen(buffer));
 		printf("\n\nThe length of line is %ld\n\n", strlen(buffer));
+		lineCount++;
 		if (!text) {
 			printf("Error text pointer is null");
 
 			exit(1);
 		}
 		strcat(text, buffer);
-		printf("%s\n", buffer);
+		//printf("%s\n", buffer);
 	}
+	//making sure it has trailing null
+	strcat(text, "\0");
 	printf("\ntext:\n%s", text);
+	
+	//now turning the text string into lines by delimiting with \n then adding on a null
+	char *lineOnQueue = malloc(sizeof(BUFFERSIZE));
+	lineOnQueue = strtok(text, "\n");
+	printf("lineOnQueue = %s\n", lineOnQueue);
+	for (int i = 0; i < lineCount - 2; i++) {
+		lineOnQueue = strtok(NULL, "\n");
+		lineOnQueue = strcat(lineOnQueue, "\0");
+		printf("lineOnQueue = %s\n", lineOnQueue);
+		char *goingOn = malloc(sizeof(BUFFERSIZE));
+		strcpy(goingOn, lineOnQueue);
+		printf("this is goingOn = %s\n", goingOn);
+		put(&q, goingOn);
+		//char *pleaseGod = get(&q);
+		//printf("please god be a line:%s\n", pleaseGod);
+	
+	}
+
+	for (int i = 0; i < lineCount - 2; i++) {
+
+		char *pleaseGod = get(&q);
+		printf("please god be a line: %s\n", pleaseGod);
+	}
 
 
 	//this will be the stdin
@@ -91,7 +118,7 @@ int main(int argc, char **arg) {
 	//char *fileName = arg[2];
 	int tasksToRun = atoi(arg[1]);
 	
-	printf("%d sd", tasksToRun);
+	printf("%d sd\n", tasksToRun);
 
 	return 0;
 }
