@@ -137,7 +137,9 @@ int main(int argc, char **arg) {
 		printf("\nhaha im going onto onto %d\n", i);
 		onto[i].taskNumber = numSeq[i]; 
 		int ins = onto[i].taskNumber;	
-		//on->bonqueque = &q;
+		// danger
+		onto[i].bonqueque = &q;
+		// danger
 		printf("we just added stuff\n %d\nhahapsychthiswontcompile\n", ins); 
 	}
 
