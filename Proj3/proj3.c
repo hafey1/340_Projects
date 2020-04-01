@@ -13,16 +13,16 @@ typedef struct {
 	int             q_len;       //The MAX size of the queue
 	char            **bufferLine; //buffer for adding and removing line values
 	pthread_mutex_t queue_lock; 
-	sem_t           empty;
-	sem_t           full;
+	//sem_t           empty;
+	//sem_t           full;
 } QUEUE;
 
 //for possible argument parameters into threads
 typedef struct {
-	int Task_number;
-	//make sure to malloc this line
-	char * lineAssigned;
-} ontoQueue;
+	int taskNumber;
+	struct QUEUE *bonqueque;
+	
+} ontoThread;
 
 void put(QUEUE *wholeText, char *line){
 	//assert(sem_wait(&wholeText->empty) == 0);
@@ -50,10 +50,13 @@ char* get(QUEUE *wholeText) {
 
 //the THREAD FUNCTION
 
-void *wordCount(void *taskNum) {
-	int *taskNumInt = (int *) taskNum;
-	printf("\nThis is the taskNum = %d\n", (*taskNumInt));
+void *wordCount(void *taskInfo) {
+	struct ontoThread *taskNumInt;
+	taskNumInt = (ontoThread *) taskInfo;
+	//printf("\nThis is the taskNum = %d\n", (*taskNumInt));
 	
+	char *big = get(taskNumInt->bonqueque);
+	printf("im scared : %s\n This is the taskNum: %d\n", big, taskNumInt->taskNum);
 	pthread_exit(NULL);
 
 }
@@ -64,21 +67,11 @@ int main(int argc, char **arg) {
 		printf("Please enter int:<tasksToRun>\n");
 	}
 
-	char *thing = "the meme\n\0";
-	char *secthing = "anothermeme\n\0";	
 	//this is the queue being intialized
 	//char *cbuffer[8];
 	//QUEUE q = {0, 0, 8, cbuffer, PTHREAD_MUTEX_INITIALIZER};
 	//assert(sem_init(&q.empty, 0, 8) == 0);
 	//assert(sem_init(&q.full, 0, 0) == 0);
-	//first round testing
-	//put(&q, thing);
-	//put(&q, thing);
-	//char *an = get(&q);
-	//char *gn = get(&q);
-	
-	//printf("\nThis is the meme: %s\n", thing);
-	//printf("\nThis is the sec meme: %s\n",secthing);
 
 	int lineCount = 0;
 	char *text = calloc(1,1), buffer[BUFFERSIZE];
@@ -113,8 +106,10 @@ int main(int argc, char **arg) {
 		lineOnQueue = strtok(NULL, "\n");
 		lineOnQueue = strcat(lineOnQueue, "\0");
 		printf("lineOnQueue = %s\n", lineOnQueue);
+		//
 		char *goingOn = malloc(sizeof(BUFFERSIZE));
 		strcpy(goingOn, lineOnQueue);
+		//
 		printf("this is goingOn = %s\n", goingOn);
 		put(&q, goingOn);
 	
@@ -123,9 +118,9 @@ int main(int argc, char **arg) {
 	//testing getting from the queue
 	for (int i = 0; i < lineCount - 2; i++) {
 
-
-		char *pleaseGod = get(&q);
-		printf("please god be a line: %s\n", pleaseGod);
+		//char *pleaseGod = get(&q);
+		//printf("please god be a line: %s\n", pleaseGod);
+	
 	}
 
 	int tasksToRun = atoi(arg[1]);
@@ -133,12 +128,27 @@ int main(int argc, char **arg) {
 	pthread_t threadID[tasksToRun];
 	
 	int *taskNum = malloc(tasksToRun * (sizeof(int)));
-	for (int i = 0; i < tasksToRun; i++){
-		taskNum[i] = i;
+	struct ontoThread onto[tasksToRun];
+	struct ontoThread *on;
+	
+	int increm = sizeof(onto) / sizeof(onto[0]);
+	
+	int numSeq[tasksToRun];
+	for (int i = 0; i < tasksToRun; i++) {
+		numSeq[i] = i;
+	}
+	int j = 0;
+	for ( on = onto; on < onto + increm; on++){
+		
+		on->taskNumber = j;
+		j++;
+
+		on->bonqueque = &q;
+		printf("we just added stuff\n %d\n%ld\nhahapsychthiswontcompile", onto->taskNumber, onto->bonqueque); 
 	}
 	for (int i = 0; i < tasksToRun; i++){ 
 		
-		int errorCheck = pthread_create(&threadID[i], NULL, &wordCount, taskNum++);
+		int errorCheck = pthread_create(&threadID[i], NULL, &wordCount, (void *)&onto[i]);
 		if (errorCheck) {
 			printf("Failed to create Thread %d", i);
 			exit(1);	
