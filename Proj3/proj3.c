@@ -53,11 +53,11 @@ char* get(QUEUE *wholeText) {
 
 void *wordCount(void *taskInfo) {
 	//struct ontoThread *taskNumInt;
-	ontoThread *taskNumInt = (ontoThread *) taskInfo;
+	ontoThread *argsPassed = (ontoThread *) taskInfo;
 	//printf("\nThis is the taskNum = %d\n", (*taskNumInt));
-	int Tn = taskNumInt->taskNumber;	
-	char *big = get(taskNumInt->bonqueque);
-	printf("im scared : %s\n This is the taskNum: %d\n", big, Tn);
+	int Tn = argsPassed->taskNumber;	
+	//char *big = get(argsPassed->bonqueque);
+	printf("im scared\n This is the taskNum: %d\n", Tn);
 	pthread_exit(NULL);
 
 }
@@ -115,36 +115,35 @@ int main(int argc, char **arg) {
 		put(&q, goingOn);
 	
 	}
-	
+	printf("now we did the thing\n");	
 	//testing getting from the queue
-	for (int i = 0; i < lineCount - 2; i++) {
-
-		//char *pleaseGod = get(&q);
-		//printf("please god be a line: %s\n", pleaseGod);
-	
-	}
 
 	int tasksToRun = atoi(arg[1]);
+ printf("bleh\n");
 	
 	pthread_t threadID[tasksToRun];
+ printf("dude\n");
 
 	ontoThread onto[tasksToRun];
-	
+	 printf("now we did the thing\n");
+
 	int numSeq[tasksToRun];
+	
 	for (int i = 0; i < tasksToRun; i++) {
 		numSeq[i] = i;
 	}
-	//for ( on = onto; on < onto + increm; on++){
-	for (int i = 1; i < tasksToRun; i++) {	
+
+	for (int i = 0; i < tasksToRun; i++) {	
+		printf("\nhaha im going onto onto %d\n", i);
 		onto[i].taskNumber = numSeq[i]; 
-		//on->taskNumber = j;
-		//j++;
-		
+		int ins = onto[i].taskNumber;	
 		//on->bonqueque = &q;
-		//printf("we just added stuff\n %d\n%hahapsychthiswontcompile\n", onto->taskNumber); 
+		printf("we just added stuff\n %d\nhahapsychthiswontcompile\n", ins); 
 	}
+
 	for (int i = 0; i < tasksToRun; i++){ 
-		pthread_create(&threadID[i], NULL, &wordCount, (void *) &onto[i]);
+		printf("this is right before the thread creation\n");
+		assert(pthread_create(&threadID[i], NULL, &wordCount, (void *) &onto[i]) == 0);
 	}
 
 	
