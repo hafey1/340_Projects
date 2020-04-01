@@ -19,8 +19,9 @@ typedef struct {
 
 //for possible argument parameters into threads
 typedef struct {
+	
 	int taskNumber;
-	struct QUEUE *bonqueque;
+	QUEUE* bonqueque;
 	
 } ontoThread;
 
@@ -51,12 +52,12 @@ char* get(QUEUE *wholeText) {
 //the THREAD FUNCTION
 
 void *wordCount(void *taskInfo) {
-	struct ontoThread *taskNumInt;
-	taskNumInt = (ontoThread *) taskInfo;
+	//struct ontoThread *taskNumInt;
+	ontoThread *taskNumInt = (ontoThread *) taskInfo;
 	//printf("\nThis is the taskNum = %d\n", (*taskNumInt));
-	
+	int Tn = taskNumInt->taskNumber;	
 	char *big = get(taskNumInt->bonqueque);
-	printf("im scared : %s\n This is the taskNum: %d\n", big, taskNumInt->taskNum);
+	printf("im scared : %s\n This is the taskNum: %d\n", big, Tn);
 	pthread_exit(NULL);
 
 }
@@ -126,34 +127,24 @@ int main(int argc, char **arg) {
 	int tasksToRun = atoi(arg[1]);
 	
 	pthread_t threadID[tasksToRun];
-	
-	int *taskNum = malloc(tasksToRun * (sizeof(int)));
-	struct ontoThread onto[tasksToRun];
-	struct ontoThread *on;
-	
-	int increm = sizeof(onto) / sizeof(onto[0]);
+
+	ontoThread onto[tasksToRun];
 	
 	int numSeq[tasksToRun];
 	for (int i = 0; i < tasksToRun; i++) {
 		numSeq[i] = i;
 	}
-	int j = 0;
-	for ( on = onto; on < onto + increm; on++){
+	//for ( on = onto; on < onto + increm; on++){
+	for (int i = 1; i < tasksToRun; i++) {	
+		onto[i].taskNumber = numSeq[i]; 
+		//on->taskNumber = j;
+		//j++;
 		
-		on->taskNumber = j;
-		j++;
-
-		on->bonqueque = &q;
-		printf("we just added stuff\n %d\n%ld\nhahapsychthiswontcompile", onto->taskNumber, onto->bonqueque); 
+		//on->bonqueque = &q;
+		//printf("we just added stuff\n %d\n%hahapsychthiswontcompile\n", onto->taskNumber); 
 	}
 	for (int i = 0; i < tasksToRun; i++){ 
-		
-		int errorCheck = pthread_create(&threadID[i], NULL, &wordCount, (void *)&onto[i]);
-		if (errorCheck) {
-			printf("Failed to create Thread %d", i);
-			exit(1);	
-		}
-		
+		pthread_create(&threadID[i], NULL, &wordCount, (void *) &onto[i]);
 	}
 
 	
