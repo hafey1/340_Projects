@@ -61,7 +61,7 @@ void *wordCount(void *taskInfo) {
 	printf("\nComing from wordCount: %s\n", big);
 
 	// here!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-	int lineWords = 1;
+	int lineWords = 0;
 
 	for(int i = 0; big[i] != '\0'; i++){
 
