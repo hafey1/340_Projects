@@ -65,7 +65,7 @@ void *wordCount(void *taskInfo) {
 
 	for(int i = 0; big[i] != '\0'; i++){
 
-		if(big[i] == ' ' || big[i] == '\n' || big[i] == '\t')
+		if(big[i] == ' ')
 		{
 			lineWords++;
 		}
@@ -119,6 +119,8 @@ int main(int argc, char **arg) {
 	//now turning the text string into lines by delimiting with \n then adding on a null
 	char *lineOnQueue = malloc(BUFFERSIZE);
 	lineOnQueue = strtok(text, "\n");
+	lineOnQueue = strcat(lineOnQueue, "\0");
+	put(&q, lineOnQueue);
 	//printf("lineOnQueue = %s\n", lineOnQueue);
 	for (int i = 0; i < lineCount - 2; i++) {
 		lineOnQueue = strtok(NULL, "\n");
