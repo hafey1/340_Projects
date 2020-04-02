@@ -1,2 +1,2 @@
 all:
-	gcc -pthread -g -o proj3 proj3.c
+	gcc -pthread -g -o proj3 wordCount.c

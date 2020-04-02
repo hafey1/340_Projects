@@ -6,6 +6,9 @@
 #include <semaphore.h>
 
 #define BUFFERSIZE 1024              //the max size of a line
+//heeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeerrrrrrrrrrrrrrrrrrrrrreeeeeeeeeeeeeeeeee
+int totalWords;
+//hhhheeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeerrrrreee
 
 typedef struct {
 	int             fill;        //next point to fill in the queue
@@ -20,7 +23,6 @@ typedef struct {
 //for possible argument parameters into threads
 typedef struct {
 	int taskNumber;
-	int totalWordsT;
 	QUEUE* bonqueque;
 } ontoThread;
 
@@ -58,8 +60,7 @@ void *wordCount(void *taskInfo) {
 	char *big = get(argsPassed->bonqueque);
 	printf("\nComing from wordCount: %s\n", big);
 
-	// here!!!!!!
-	int totalWords = argsPassed->totalWordsT;
+	// here!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 	int lineWords = 1;
 
 	for(int i = 0; big[i] != '\0'; i++){
@@ -67,12 +68,13 @@ void *wordCount(void *taskInfo) {
 		if(big[i] == ' ' || big[i] == '\n' || big[i] == '\t')
 		{
 			lineWords++;
-			totalWords++;
 		}
 	}
 
-	printf("The line contains %d number of words\n", lineWords);
-	//here!!!!!!
+	totalWords = totalWords + lineWords;
+
+	printf("The line contains %d words from task number: %d\n", lineWords, Tn);
+	//here!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 	pthread_exit(NULL);
 
 }
@@ -88,7 +90,7 @@ int main(int argc, char **arg) {
 	//QUEUE q = {0, 0, 8, cbuffer, PTHREAD_MUTEX_INITIALIZER};
 	//assert(sem_init(&q.empty, 0, 8) == 0);
 	//assert(sem_init(&q.full, 0, 0) == 0);
-	int totalWords = 0
+	totalWords = 0;
 	int lineCount = 0;
 	char *text = calloc(1,1), buffer[BUFFERSIZE];
 	//now to get stuff from stdin black magic dont question
@@ -115,7 +117,7 @@ int main(int argc, char **arg) {
 
 
 	//now turning the text string into lines by delimiting with \n then adding on a null
-	char *lineOnQueue = malloc(sizeof(BUFFERSIZE));
+	char *lineOnQueue = malloc(BUFFERSIZE);
 	lineOnQueue = strtok(text, "\n");
 	//printf("lineOnQueue = %s\n", lineOnQueue);
 	for (int i = 0; i < lineCount - 2; i++) {
@@ -123,7 +125,7 @@ int main(int argc, char **arg) {
 		lineOnQueue = strcat(lineOnQueue, "\0");
 		//printf("lineOnQueue = %s\n", lineOnQueue);
 		//
-		char *goingOn = malloc(sizeof(BUFFERSIZE));
+		char *goingOn = malloc(BUFFERSIZE);
 		strcpy(goingOn, lineOnQueue);
 		//
 		printf("this is goingOn = %s\n", goingOn);
@@ -155,10 +157,6 @@ int main(int argc, char **arg) {
 		// danger
 		onto[i].bonqueque = &q;
 		QUEUE *bigpoint = onto[i].bonqueque;
-
-		//HEREEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
-		onto[i].totalWordsT = 0
-		//HEREEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
 		// danger
 //		printf("we just added stuff\n%p <--address of queue\n %d\nhahapsychthiswontcompile\n", (void *)bigpoint, ins);
 	}
@@ -168,10 +166,11 @@ int main(int argc, char **arg) {
 		assert(pthread_create(&threadID[i], NULL, &wordCount, (void *) &onto[i]) == 0);
 	}
 
-
 	for (int i = 0; i < tasksToRun; i++){
 		pthread_join(threadID[i], NULL);
 	}
-
+	//heeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeerrrrrre
+	printf("\nAll the words: %d\n\n", totalWords);
+	//hhhhhhhhhhhhhhhhhheeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeere
 	return 0;
 }
