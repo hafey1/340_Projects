@@ -13,8 +13,8 @@ typedef struct {
 	int             q_len;       //The MAX size of the queue
 	char            **bufferLine; //buffer for adding and removing line values
 	pthread_mutex_t queue_lock; 
-	//sem_t           empty;
-	//sem_t           full;
+	sem_t           empty;
+	sem_t           full;
 } QUEUE;
 
 //for possible argument parameters into threads
@@ -26,24 +26,24 @@ typedef struct {
 } ontoThread;
 
 void put(QUEUE *wholeText, char *line){
-	//assert(sem_wait(&wholeText->empty) == 0);
+	assert(sem_wait(&wholeText->empty) == 0);
 	assert(pthread_mutex_lock(&wholeText->queue_lock) == 0);
 	
 	wholeText->bufferLine[wholeText->fill] = (char*) line;
 	wholeText->fill = (wholeText->fill + 1) % (wholeText->q_len + 1);
 	
 	assert(pthread_mutex_unlock(&wholeText->queue_lock) == 0);
-	//assert(sem_post(&wholeText->full) == 0);
+	assert(sem_post(&wholeText->full) == 0);
 }
 
 char* get(QUEUE *wholeText) {
-	//assert(sem_wait(&wholeText->full) == 0);
+	assert(sem_wait(&wholeText->full) == 0);
 	assert(pthread_mutex_lock(&wholeText->queue_lock) == 0);
 	char *temp = wholeText->bufferLine[wholeText->use];
 	wholeText->use = (wholeText->use + 1) % (wholeText->q_len + 1);
 
 	assert(pthread_mutex_unlock(&wholeText->queue_lock) == 0);
-	//assert(sem_post(&wholeText->empty) == 0);
+	assert(sem_post(&wholeText->empty) == 0);
 
 	return temp;
 }
@@ -95,13 +95,15 @@ int main(int argc, char **arg) {
 	
 	char *cBuffer[lineCount];
         QUEUE q = { 0, 0, lineCount, cBuffer, PTHREAD_MUTEX_INITIALIZER};
-        //assert(sem_init(&q.empty, 0, lineCount) == 0);
-        //assert(sem_init(&q.full, 0, 0) == 0);
+        assert(sem_init(&q.empty, 0, lineCount) == 0);
+        assert(sem_init(&q.full, 0, 0) == 0);
 
 
 	//now turning the text string into lines by delimiting with \n then adding on a null
 	char *lineOnQueue = malloc(sizeof(BUFFERSIZE));
 	lineOnQueue = strtok(text, "\n");
+	lineOnQueue = strcat(lineOnQueue, "\0");
+	put(&q, lineOnQueue);
 	//printf("lineOnQueue = %s\n", lineOnQueue);
 	for (int i = 0; i < lineCount - 2; i++) {
 		lineOnQueue = strtok(NULL, "\n");
