@@ -23,18 +23,18 @@ typedef struct {
 //for possible argument parameters into threads
 typedef struct {
 	int taskNumber;
-	QUEUE* bonqueque;
+	QUEUE* que;
 } ontoThread;
 
 void put(QUEUE *wholeText, char *line){
-	
+
 	//signal semaphore and lock
 	assert(sem_wait(&wholeText->empty) == 0);
 	assert(pthread_mutex_lock(&wholeText->queue_lock) == 0);
 
 	wholeText->bufferLine[wholeText->fill] = (char*) line;
 	wholeText->fill = (wholeText->fill + 1) % (wholeText->q_len + 1);
-	
+
 	// signal semaphore and unlock
 	assert(pthread_mutex_unlock(&wholeText->queue_lock) == 0);
 	assert(sem_post(&wholeText->full) == 0);
@@ -44,12 +44,12 @@ char* get(QUEUE *wholeText) {
 	// signal semaphore and lock
 	assert(sem_wait(&wholeText->full) == 0);
 	assert(pthread_mutex_lock(&wholeText->queue_lock) == 0);
-	
+
 	char *temp = wholeText->bufferLine[wholeText->use];
 	wholeText->use = (wholeText->use + 1) % (wholeText->q_len + 1);
 	int currLineNum = wholeText->use;
 	printf("Current line number is %d\n", currLineNum);
-	
+
 	// signal semaphore and lock
 	assert(pthread_mutex_unlock(&wholeText->queue_lock) == 0);
 	assert(sem_post(&wholeText->empty) == 0);
@@ -63,15 +63,15 @@ void *wordCount(void *taskInfo) {
 
 	ontoThread *argsPassed = (ontoThread *) taskInfo;
 	int Tn = argsPassed->taskNumber;
-	int size = argsPassed->bonqueque->q_len;
+	int size = argsPassed->que->q_len;
 
 	while(counter < size - 1){
 		counter++;
-		char *big = get(argsPassed->bonqueque);
+		char *big = get(argsPassed->que);
 		printf("Current line content : %s\n", big);
 
 		int lineWords = 0;
-		
+
 		// word detection, either a trailing space or a trailing null byte
 		for(int i = 0; big[i] != '\0'; i++){
 
@@ -129,15 +129,15 @@ int main(int argc, char **arg) {
 
 	for (int i = 0; i < lineCount - 2; i++) {
 		lineOnQueue = strtok(NULL, "\n");
-		lineOnQueue = strcat(lineOnQueue, "\0");		
+		lineOnQueue = strcat(lineOnQueue, "\0");
 		put(&q, lineOnQueue);
 	}
-	
+
 	// initializing task numbers and amount of tasks
 	int tasksToRun = atoi(arg[1]);
 	pthread_t threadID[tasksToRun];
 	ontoThread onto[tasksToRun];
-	
+
 	//for task number so each task has unique value in a unique location
 	int numSeq[tasksToRun];
 	for (int i = 0; i < tasksToRun; i++) {
@@ -147,7 +147,7 @@ int main(int argc, char **arg) {
 	for (int i = 0; i < tasksToRun; i++) {
 		//putting task number and queue into thread argument structure
 		onto[i].taskNumber = numSeq[i];
-		onto[i].bonqueque = &q;
+		onto[i].que = &q;
 	}
 
 	for (int i = 0; i < tasksToRun; i++){
