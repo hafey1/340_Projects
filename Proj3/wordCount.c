@@ -107,6 +107,13 @@ int main(int argc, char **arg) {
 		strcat(text, buffer);
 		//printf("%s\n", buffer);
 	}
+
+	//adding the terminating element
+	lineCount++;
+	char *end = malloc(BUFFERSIZE);
+	strcpy(end, "^\0");
+
+			
 	//making sure it has trailing null
 	strcat(text, "\0");
 	//printf("\ntext:\n%s", text);
@@ -123,7 +130,7 @@ int main(int argc, char **arg) {
 	lineOnQueue = strcat(lineOnQueue, "\0");
 	put(&q, lineOnQueue);
 	//printf("lineOnQueue = %s\n", lineOnQueue);
-	for (int i = 0; i < lineCount - 2; i++) {
+	for (int i = 0; i < lineCount - 3; i++) {
 		lineOnQueue = strtok(NULL, "\n");
 		lineOnQueue = strcat(lineOnQueue, "\0");
 		//printf("lineOnQueue = %s\n", lineOnQueue);
@@ -135,6 +142,7 @@ int main(int argc, char **arg) {
 		put(&q, goingOn);
 
 	}
+	put(&q, end);
 	//printf("now we did the thing\n");
 	//testing getting from the queue
 
