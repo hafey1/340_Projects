@@ -1,0 +1,9 @@
+College of Charleston
+CSCI 350 Operating Systems
+	A small program that uses a concurrent queue to do a word count of a text file incoming from stdin 
+
+	compile with command --> make or command --> gcc -pthreads -g -o wordCount wordCount.c
+
+	execute with ./wordCount int: <numberOfThreads> < <locationOfTextFile>
+		an example provided: ./wordCount 3 < randomLatin
+
