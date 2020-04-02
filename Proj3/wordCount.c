@@ -71,7 +71,7 @@ void *wordCount(void *taskInfo) {
 
 		for(int i = 0; big[i] != '\0'; i++){
 
-			if(big[i] == ' ')
+			if(big[i] == ' ' || big[i + 1] == '\0')
 			{
 				lineWords++;
 			}
