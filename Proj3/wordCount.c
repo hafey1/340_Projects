@@ -39,7 +39,6 @@ void put(QUEUE *wholeText, char *line){
 }
 
 char* get(QUEUE *wholeText) {
-
 	assert(sem_wait(&wholeText->full) == 0);
 	assert(pthread_mutex_lock(&wholeText->queue_lock) == 0);
 	char *temp = wholeText->bufferLine[wholeText->use];
@@ -48,7 +47,6 @@ char* get(QUEUE *wholeText) {
 	printf("The current line is %d\t:::", currLineNum);
 	assert(pthread_mutex_unlock(&wholeText->queue_lock) == 0);
 	assert(sem_post(&wholeText->empty) == 0);
-
 	return temp;
 }
 
@@ -61,8 +59,10 @@ void *wordCount(void *taskInfo) {
 
 	//printf("\nThis is the taskNum = %d\n", (*taskNumInt));
 	int Tn = argsPassed->taskNumber;
-	int size = argsPassed->bonqueque->fill;
-	while(counter < size - 1){
+	int size = argsPassed->bonqueque->q_len;
+
+	while(counter < size - 2){
+		counter++;
 		char *big = get(argsPassed->bonqueque);
 		printf("\nComing from wordCount: %s\n", big);
 
@@ -77,10 +77,10 @@ void *wordCount(void *taskInfo) {
 			}
 		}
 		totalWords = totalWords + lineWords;
-		counter++;
 		printf("The line contains %d words from task number: %d\n", lineWords, Tn);
 		//here!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 	}
+
 	pthread_exit(NULL);
 }
 
@@ -114,10 +114,8 @@ int main(int argc, char **arg) {
 
 	//adding the terminating element
 	lineCount++;
-	char *end = malloc(BUFFERSIZE);
-	strcpy(end, "^\0");
 
-			
+
 	//making sure it has trailing null
 	strcat(text, "\0");
 	//printf("\ntext:\n%s", text);
@@ -146,7 +144,6 @@ int main(int argc, char **arg) {
 		put(&q, goingOn);
 
 	}
-	put(&q, end);
 	//printf("now we did the thing\n");
 	//testing getting from the queue
 
