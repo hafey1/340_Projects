@@ -7,6 +7,9 @@
 
 #define BUFFERSIZE 1024              //the max size of a line
 
+
+
+
 typedef struct {
 	int             fill;        //next point to fill in the queue
 	int             use;         //next point to get in the queue

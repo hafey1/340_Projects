@@ -42,7 +42,8 @@ char* get(QUEUE *wholeText) {
 	assert(pthread_mutex_lock(&wholeText->queue_lock) == 0);
 	char *temp = wholeText->bufferLine[wholeText->use];
 	wholeText->use = (wholeText->use + 1) % (wholeText->q_len + 1);
-
+	int currLineNum = wholeText->use;
+	printf("The current line is %d\t:::", currLineNum);
 	assert(pthread_mutex_unlock(&wholeText->queue_lock) == 0);
 	//assert(sem_post(&wholeText->empty) == 0);
 
