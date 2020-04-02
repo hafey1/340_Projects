@@ -8,6 +8,7 @@
 #define BUFFERSIZE 1024              //the max size of a line
 //heeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeerrrrrrrrrrrrrrrrrrrrrreeeeeeeeeeeeeeeeee
 int totalWords;
+int counter;
 //hhhheeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeerrrrreee
 
 typedef struct {
@@ -38,6 +39,7 @@ void put(QUEUE *wholeText, char *line){
 }
 
 char* get(QUEUE *wholeText) {
+
 	assert(sem_wait(&wholeText->full) == 0);
 	assert(pthread_mutex_lock(&wholeText->queue_lock) == 0);
 	char *temp = wholeText->bufferLine[wholeText->use];
@@ -56,28 +58,30 @@ char* get(QUEUE *wholeText) {
 void *wordCount(void *taskInfo) {
 	//struct ontoThread *taskNumInt;
 	ontoThread *argsPassed = (ontoThread *) taskInfo;
+
 	//printf("\nThis is the taskNum = %d\n", (*taskNumInt));
 	int Tn = argsPassed->taskNumber;
-	char *big = get(argsPassed->bonqueque);
-	printf("\nComing from wordCount: %s\n", big);
+	int size = argsPassed->bonqueque->fill;
+	while(counter < size - 1){
+		char *big = get(argsPassed->bonqueque);
+		printf("\nComing from wordCount: %s\n", big);
 
-	// here!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-	int lineWords = 0;
+		// here!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+		int lineWords = 0;
 
-	for(int i = 0; big[i] != '\0'; i++){
+		for(int i = 0; big[i] != '\0'; i++){
 
-		if(big[i] == ' ')
-		{
-			lineWords++;
+			if(big[i] == ' ')
+			{
+				lineWords++;
+			}
 		}
+		totalWords = totalWords + lineWords;
+		counter++;
+		printf("The line contains %d words from task number: %d\n", lineWords, Tn);
+		//here!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 	}
-
-	totalWords = totalWords + lineWords;
-
-	printf("The line contains %d words from task number: %d\n", lineWords, Tn);
-	//here!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 	pthread_exit(NULL);
-
 }
 
 int main(int argc, char **arg) {
